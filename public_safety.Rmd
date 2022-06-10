@@ -4,7 +4,6 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     source_code: embed
-    social: [ "twitter", "facebook", "menu" ]
 date: "`r Sys.Date()`"    
 ---
 
