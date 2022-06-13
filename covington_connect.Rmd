@@ -30,26 +30,30 @@ library(ggpubr)
 library(plotly)
 theme_set(theme_pubr())
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/WiFi_Cov_Connect/wifi.RData", .GlobalEnv)
+load(file = "wifi.RData", .GlobalEnv)
 
 wifi <- wifi_data
 wifi$Timestamp <- ymd(wifi$Timestamp)
 wifi$Date <- format(wifi$Timestamp, "%Y-%m")
 
-
 #Total Registrations Count
 reg_count <- wifi_data %>%
   count(wt = Registrations)
+  
 #Total Markerting Opt-Ins Count  
 mrkt_opt_ins <- wifi_data %>%
   count(wt = `Marketing Opt-Ins`)
+  
 #Opt-in percentage of registrations
 opt_in_pct <- round(mrkt_opt_ins[1,1]/reg_count[1,1] *100, 0)
+
 #Total Session Count  
 sess_count <-wifi_data %>%
   count(wt = Sessions)
+  
 #Average session time
 sess_time <- round(mean(wifi_data$Time_Usage_Minutes, na.rm = TRUE), 0)
+
 #CIPS Session Count  
 cips_sess_count <-wifi_data %>%
   count(wt = Sessions_CIPS)
