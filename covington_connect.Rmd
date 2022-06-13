@@ -1,0 +1,180 @@
+---
+title: "Covington Connect"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: ["menu"]
+    source_code: "https://github.com/covanalytics/CovData-Dashboards.git"
+date: "`r Sys.Date()`"    
+---
+
+<style>                     
+.navbar {
+  background-color:#46b5d2;
+  border-color:black;
+}
+.navbar-brand {
+font-weight: bold;
+}
+
+</style> 
+
+
+```{r eval=TRUE, message=FALSE, warning=FALSE, cache = TRUE}
+
+library(flexdashboard)
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(ggpubr)
+library(plotly)
+theme_set(theme_pubr())
+
+load(file = "U:/CityWide Performance/CovStat/CovStat Projects/WiFi_Cov_Connect/wifi.RData", .GlobalEnv)
+
+wifi <- wifi_data
+wifi$Timestamp <- ymd(wifi$Timestamp)
+wifi$Date <- format(wifi$Timestamp, "%Y-%m")
+
+
+#Total Registrations Count
+reg_count <- wifi_data %>%
+  count(wt = Registrations)
+#Total Markerting Opt-Ins Count  
+mrkt_opt_ins <- wifi_data %>%
+  count(wt = `Marketing Opt-Ins`)
+#Opt-in percentage of registrations
+opt_in_pct <- round(mrkt_opt_ins[1,1]/reg_count[1,1] *100, 0)
+#Total Session Count  
+sess_count <-wifi_data %>%
+  count(wt = Sessions)
+#Average session time
+sess_time <- round(mean(wifi_data$Time_Usage_Minutes, na.rm = TRUE), 0)
+#CIPS Session Count  
+cips_sess_count <-wifi_data %>%
+  count(wt = Sessions_CIPS)
+
+
+reg_cnt_formatted <-formatC(reg_count, 1000, format = "d", big.mark = ",")
+mrkt_opt_formatted <-formatC(mrkt_opt_ins, 1000, format = "d", big.mark = ",")
+sess_cnt_formatted <-formatC(sess_count, 1000, format = "d", big.mark = ",")
+cips_sess_formatted <-formatC(cips_sess_count, 1000, format = "d", big.mark = ",")
+
+```
+
+
+Dashboard
+===================================
+
+Row
+------------------------------------
+### Registrations
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(reg_cnt_formatted, icon = "fa-wifi", color = "#46b5d2")
+
+```
+
+### Marketing Opt-Ins %
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(opt_in_pct, icon = "fa-info", color = "#DB5E8A" )
+
+```
+
+### Sessions
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(sess_cnt_formatted, icon = "fa-users", color = "#48BEDB" )
+
+```
+
+### Avg. Session Duration (minutes)
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(sess_time, icon = "fa-clock", color = "#DBCD32" )
+
+```
+
+### Student Sessions
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(cips_sess_formatted, icon = "fa-child", color = "#8F8628")
+
+```
+
+Row
+----------------------------------------------------------------------
+ 
+
+### **Monthly Wi-Fi Registrations**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#Total registrations
+  registration_plot <- wifi %>%
+  count(Date, wt = Registrations)%>%
+  mutate_at(vars(Date), list(ym))%>%
+  rename(Registrations = n)%>%
+  ggplot(aes(x=Date, y=Registrations))+
+  geom_line(color = "#bd5734") + 
+  geom_point(size = 1) +
+  scale_x_date(date_minor_breaks = "1 month")+
+  theme_bw()+
+        theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.ticks.x = element_line(colour = "black"),
+        axis.text = element_text(size = 7), 
+        axis.title = element_text(size =9),
+        panel.grid.major = element_line(colour = "#D4D2D3"))
+  
+
+ggplotly(registration_plot)%>%
+  config(displayModeBar = F)
+
+```
+
+Row
+----------------------------------------------------------------------
+### **Monthly Wi-Fi Sessions**
+
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+session_plot <- wifi %>%
+  count(Date, wt = Sessions)%>%
+  mutate_at(vars(Date), list(ym))%>%
+  rename(Sessions = n)%>%
+  ggplot(aes(x=Date, y=Sessions))+
+  geom_line(color = "#00802b") + 
+  geom_point(size = 1) +
+  scale_x_date(date_minor_breaks = "1 month")+
+  theme_bw()+
+        theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.ticks.x = element_line(colour = "black"),
+        axis.text = element_text(size = 7), 
+        axis.title = element_text(size =9),
+        panel.grid.major = element_line(colour = "#D4D2D3"))
+
+
+ggplotly(session_plot)%>%
+  config(displayModeBar = F)
+```
+
+Project Description
+===================================
+
+Column
+-------------------------------------------------------------------
+
+### Project Description 
+
+Covington Connect is an aggressive effort to smash the digital divide in Covington by expanding access to free public Wi-Fi through much of the City.
+
+Covington Connect is a collaborative effort involving the City of Covington, Cincinnati Bell, the Housing Authority of Covington (HAC), Covington Independent Public Schools, Renaissance Covington, local computer firms Blair Technology Group and ReGadget, and Comp-U-Dopt, a Houston-based non-profit organization.
+
+**Phase I** of the project began in 2018 with setting up 22 Wi-Fi hotspots that created zones of connectivity in the downtown area.
+
+**Phase II** of the project began in September 2020, and added 124 Wi-Fi hotspots. These are concentrated in eight neighborhoods where the most Covington students live – Eastside, Helentown, Austinburg, Peaselburg, Levassor Park, Lewisburg, Latonia, and West Covington. 
+
+Column
+----------------------------------------------------
