@@ -1,5 +1,6 @@
 ---
 title: "Growing Economy"
+author: "Todd Sink, City of Covington"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
