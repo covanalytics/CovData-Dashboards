@@ -57,7 +57,7 @@ covdata_comprss <- function(tx) {
 #Bind list of files into a data frame
 #recycling <- rbind.fill(recycling_files)
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/thriving_neighborhoods/recycling.RData")
+load(file = ".../recycling.RData")
 
 #Get recycling percentage by month
 current_recycling <- recycling %>%
