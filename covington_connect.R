@@ -41,7 +41,7 @@ covdata_comprss <- function(tx) {
            c("","K","M","B","T")[div], sep = "" )}
 
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/WiFi_Cov_Connect/wifi.RData", .GlobalEnv)
+load(file = ".../wifi.RData", .GlobalEnv)
 
 wifi <- wifi_data
 wifi$Timestamp <- ymd(wifi$Timestamp)
