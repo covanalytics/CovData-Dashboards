@@ -32,7 +32,7 @@ font-weight: bold;
 library(flexdashboard)
 library(plyr)
 library(tidyverse)
-library(lubridate)
+library(lubridate) 
 library(ggpubr)
 library(plotly)
 library(scales)
