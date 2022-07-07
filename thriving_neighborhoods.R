@@ -1,6 +1,5 @@
 ---
 title: "Thriving Neighborhoods"
-author: "Todd Sink, City of Covington"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -8,6 +7,8 @@ output:
     social: ["menu"]
     source_code: "https://github.com/covanalytics/CovData-Dashboards.git"
     self_contained: false
+    favicon: favicon.SEAL.ico
+
 ---
 
 <style>                     
@@ -21,7 +22,6 @@ font-weight: bold;
 
 </style> 
 
-
 ```{r eval=TRUE, message=FALSE, warning=FALSE, cache = TRUE}
 
 library(flexdashboard)
@@ -30,6 +30,7 @@ library(tidyverse)
 library(lubridate)
 library(ggpubr)
 library(plotly)
+library(scales)
 theme_set(theme_pubr())
 
 #Function to abbreviate dollar amounts and add symbol
@@ -77,14 +78,11 @@ month_recycling <- current_recycling %>%
 
 load(file = ".../tonnage.RData", .GlobalEnv)
 
-recycling_profiles <- c("Landfill Diversion", "GREIF RECYCLING", "RIVER METALS")
-
 #remove grouped_df class
 tonnage <- as.data.frame(tonnage)
 
 #get current year recycling tonnage
 recycling_tonnage <- tonnage %>%
-  filter(LandfillDescription %in% recycling_profiles)%>%
   count(FY, wt = ActTons)%>%
   arrange(desc(FY))%>%
   mutate(FY_sort = as.numeric(FY))%>%
@@ -187,7 +185,7 @@ valueBox(current_pothole_repairs, icon = "fa-road", color = "#D26346" )
 ### Cleanups
 ```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
 
-valueBox(current_cleanups, icon = "fa-tree", color = "#d246b5" )
+valueBox(current_cleanups, icon = "fa-broom", color = "#d246b5" )
 
 ```
 
@@ -216,17 +214,20 @@ Row
 #Recycling percentage by month
   recycling_plot <- current_recycling %>%
   mutate(`M-Y` = format(Date, format='%m-%Y'))%>%
+  rename(Rate = Recycling)%>%
   
-  ggplot(aes(x=Date, y=Recycling, label = `M-Y`))+
+  ggplot(aes(x=Date, y=Rate, label = `M-Y`))+
   geom_line(color = "grey") + 
   geom_point(size = 0.6) +
   scale_x_date(date_minor_breaks = "1 month")+
+  ylim(c(50, 70))+
   theme_bw()+
         theme(legend.position = "none",
         legend.title = element_blank(),
         axis.ticks.x = element_line(colour = "black"),
-        axis.text = element_text(size = 7), 
-        axis.title = element_text(size =9),
+        #axis.text = element_text(size = 7), 
+        axis.title.y = element_text(size =9),
+        axis.title.x = element_blank(),
         panel.grid.major = element_line(colour = "#D4D2D3"))
   
 
@@ -249,12 +250,11 @@ ggplotly(recycling_plot, tooltip = c("label", "y"))%>%
   ggplot(aes(x=FY, y=Tons))+
   geom_bar(stat = 'identity', fill = "#46b5d2")+
   ylim(c(0,2800))+
-  geom_text(aes(label=paste0(Tons, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  geom_text(aes(label=paste0(scales::comma(Tons), "<br>")),  position=position_nudge(0.0), size = 3.3)+
   theme_bw()+
-  ylab('Tons')+
+  scale_y_continuous(label=scales::label_number(suffix = "K", scale = 1e-3), limits = c(0, 3000))+
   theme(legend.position = "none",
         legend.title = element_blank(),
-        axis.text.x = element_text(size = 8),
         axis.title = element_blank())
 
 ggplotly(tonnage_plot, tooltip = c("x", "y"))%>%
@@ -271,16 +271,15 @@ ggplotly(tonnage_plot, tooltip = c("x", "y"))%>%
 
 #Pothole Repairs by Fiscal Year
   pothole_plot <- pothole_repairs %>%
+  rename(Repairs = Orders)%>%
   
-  ggplot(aes(x=FY, y=Orders))+
+  ggplot(aes(x=FY, y=Repairs))+
   geom_bar(stat = 'identity', fill = "#D26346")+
   ylim(c(0,500))+
-  geom_text(aes(label=paste0(Orders, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  geom_text(aes(label=paste0(Repairs, "<br>")),  position=position_nudge(0.0), size = 3.3)+
   theme_bw()+
-  #ylab('orders')+
   theme(legend.position = "none",
         legend.title = element_blank(),
-        axis.text.x = element_text(size = 8),
         axis.title = element_blank())
 
 ggplotly(pothole_plot, tooltip = c("x", "y"))%>%
@@ -300,16 +299,16 @@ Row
 
 #Cleanups by Fiscal Year
   cleanups_plot <- cleanups %>%
+  rename(Cleanups = Orders)%>%
   
-  ggplot(aes(x=FY, y=Orders))+
+  ggplot(aes(x=FY, y=Cleanups))+
   geom_bar(stat = 'identity', fill = "#d246b5")+
   ylim(c(0,1000))+
-  geom_text(aes(label=paste0(Orders, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  geom_text(aes(label=paste0(Cleanups, "<br>")),  position=position_nudge(0.0), size = 3.3)+
   theme_bw()+
   #ylab('orders')+
   theme(legend.position = "none",
         legend.title = element_blank(),
-        axis.text.x = element_text(size = 8),
         axis.title = element_blank())
 
 ggplotly(cleanups_plot, tooltip = c("x", "y"))%>%
@@ -326,16 +325,16 @@ ggplotly(cleanups_plot, tooltip = c("x", "y"))%>%
 
 #Waste Receptacle Issues by Fiscal Year
   waste_plot <- waste_cans %>%
+  rename(Issues = Orders)%>%
   
-  ggplot(aes(x=FY, y=Orders))+
+  ggplot(aes(x=FY, y=Issues))+
   geom_bar(stat = 'identity', fill = "#46d2a9")+
   ylim(c(0,1000))+
-  geom_text(aes(label=paste0(Orders, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  geom_text(aes(label=paste0(Issues, "<br>")),  position=position_nudge(0.0), size = 3.3)+
   theme_bw()+
   #ylab('orders')+
   theme(legend.position = "none",
         legend.title = element_blank(),
-        axis.text.x = element_text(size = 8),
         axis.title = element_blank())
 
 ggplotly(waste_plot, tooltip = c("x", "y"))%>%
@@ -354,13 +353,13 @@ ggplotly(waste_plot, tooltip = c("x", "y"))%>%
   
   ggplot(aes(x=FY, y=Violations))+
   geom_bar(stat = 'identity', fill = "#b5d246")+
-  ylim(c(0,12000))+
-  geom_text(aes(label=paste0(Violations, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  #ylim(c(0,12000))+
+  geom_text(aes(label=paste0(scales::comma(Violations), "<br>")),  position=position_nudge(0.0), size = 3.3)+
   theme_bw()+
+  scale_y_continuous(label=scales::label_number(suffix = "K", scale = 1e-3), limits = c(0, 12000))+
   #ylab('orders')+
   theme(legend.position = "none",
         legend.title = element_blank(),
-        axis.text.x = element_text(size = 8),
         axis.title = element_blank())
 
 ggplotly(code_plot, tooltip = c("x", "y"))%>%
@@ -371,13 +370,34 @@ ggplotly(code_plot, tooltip = c("x", "y"))%>%
 ```
 
 
-Data Info
+Description
 ===================================
 
 Column
 -------------------------------------------------------------------
-### Data
+
+###
+
+\
+
+**Waste Accounts Recycling**---Recycling is the recovery of useful materials, such as paper, glass, plastic, and metals from the trash to make new products, reducing the amount of natural materials needed. This dataset includes data on the number of recycling and non-recycling accounts\
+
+**Waste Tonnage Recycled**---Waste tonnage consists of everyday items we use and then throw away, such as product packaging, grass clippings, furniture, clothing, bottles, food scraps, newspapers, appliances, paint, and batteries. Recycling tonnage is the recovery of useful municipal solid waste materials--consisting of everyday items we use and throw away, such as paper, glass, plastic, and metals. These items are diverted from the landfill, processed, and converted into new materials and objects.\
+
+**Potholes Repaired**---Covington's Right-of-Way Division in the Public Works Department is responsible for maintenance of the city's right-of-ways, including streets and all other City-owned property. Responsibilities include pothole repair, storm sewer maintenance, curb and sidewalk repairs, striping of streets and crosswalks, traffic signal and streetlight maintenance, and snow removal operations.\
+
+**Cleanups**---Covington's General Maintenance Division in the Public Works Department is responsible for maintaining our public infrastructure. Division responsibilities include street cleaning, green space and alley maintenance, graffiti abatement, as well as special area litter control and fall leaf collection.\
+
+**Waste Receptacle Issues**---These refer to missed service, overflowing status, maintenance requirements, and pedestrian usage issues for public waste receptacles\
+
+**Code Enforcement Violations**---Covington's Code Enforcement Department ensures that the living and working environment within Covington is healthy and safe by enforcing the City's Property Maintenance, Nuisance, and Zoning Codes, which govern the proper maintenance and zoning of residential and commercial properties.  The Code Enforcement Department conducts periodic inspections of existing residential rental properties and commercial structures in an effort to ensure proper property management, which leads to the elimination of blight and the stabilization of neighborhoods.\
+
+**Fiscal Year Quarters**\
+
+* Q1: July - September
+* Q2: October - December
+* Q3: January - March
+* Q4: April - June
 
 
-Column
---------------------------------------------------------------------
+*Last Update: `r Sys.Date()`*
