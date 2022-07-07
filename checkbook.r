@@ -1,5 +1,6 @@
 ---
 title: "Checkbook"
+author: "Todd Sink, City of Covington"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -56,9 +57,9 @@ covdata_comprss <- function(tx, label = FALSE) {
 
 
 #All checks (last 60 days from update)
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/checkbook/check_book.RData")
+load(file = ".../check_book.RData")
 #Grouped for charts
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/checkbook/graph_checks.RData")
+load(file = ".../graph_checks.RData")
 
 ```
 
