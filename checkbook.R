@@ -1,6 +1,5 @@
 ---
 title: "Checkbook"
-author: "Todd Sink, City of Covington"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -10,6 +9,8 @@ output:
     self_contained: false
     favicon: favicon.SEAL.ico
     css: dataTables.css
+    includes:
+      in_header: GA_Script.html
 
 ---
 
@@ -25,14 +26,17 @@ font-weight: bold;
 .dataTables_scrollBody {
     max-height: 100% !important;
 }
+
 </style> 
+
+
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE, cache = TRUE}
 
 library(flexdashboard)
 library(plyr)
 library(tidyverse)
-library(lubridate) 
+library(lubridate)
 library(ggpubr)
 library(plotly)
 library(scales)
@@ -120,11 +124,11 @@ Column
          Pct. = round(Amount / sum(Amount)*100, 0),
          Vendor = fct_reorder(Vendor, Amount))%>%
   arrange(desc(Amount))%>%
-  slice(1:10)%>%
+  slice(2:11)%>%
   ggplot(aes(x=Vendor, y=Amount, label = Label_, fill = Vendor))+
   geom_bar(stat = 'identity', color = "#b2b2b2")+
   scale_fill_brewer(palette = "Set3")+
-  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 14000000))+
+  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 10000000))+
   coord_flip()+
  # geom_text(aes(label=paste0(covdata_comprss(Amount), "<br>")),position=position_nudge(0.0, -0.5),  size = 2.9)+
   theme_bw()+
@@ -132,6 +136,7 @@ Column
   theme(legend.position = "none",
         legend.title = element_blank(),
         axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
         axis.title = element_blank(),
         panel.grid.major=element_line(colour="#b2b2b2"),
         panel.grid.minor=element_line(colour="#b2b2b2"))
@@ -145,7 +150,8 @@ ggplotly(top10_vndr_plot, tooltip = c("x", "y", "label"))%>%
 
 
 ```
-
+> *The City's credit card vendor is not included*
+ 
  
 ### **Top 10 States**
 
@@ -153,7 +159,7 @@ ggplotly(top10_vndr_plot, tooltip = c("x", "y", "label"))%>%
 
 #check amounts by fiscal year
   top10_state_plot<- graph_checks %>%
-  #filter(Year >= 2018)%>%
+  filter(!grepl("FIRST FINANCIAL BANK", Vendor.Name))%>%
   count(Vendor.State, wt = Total_Amount)%>%
   rename(Amount = n, 
          State = Vendor.State)%>%
@@ -166,9 +172,9 @@ ggplotly(top10_vndr_plot, tooltip = c("x", "y", "label"))%>%
   ggplot(aes(x=State, y=Amount, label = Label_, fill = State))+
   geom_bar(stat = 'identity', color = "#b2b2b2")+
   scale_fill_brewer(palette = "Set3")+
-  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 50000000))+
+  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 40000000))+
   coord_flip()+
- # geom_text(aes(label=paste0(covdata_comprss(Amount), "<br>")),position=position_nudge(0.0, -0.5),  size = 2.9)+
+ #geom_text(aes(label=paste0("        ", covdata_comprss(Amount))),position=position_nudge(0.0, -0.5),  size = 2.9)+
   theme_bw()+
   
   theme(legend.position = "none",
@@ -187,7 +193,7 @@ ggplotly(top10_state_plot, tooltip = c("x", "y", "label"))%>%
 
 
 ```
-> **Based on billing address of vendors**
+> *Based on billing address of vendors*
 
 Table
 ===================================
@@ -195,17 +201,19 @@ Table
 Row
 -------------------------------------------------------------------
 
+
 ```{r  eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
 #Create data table
 font.size <- "9pt"
-datatable(check_book, escape = FALSE, width = '100%', height = '100%', filter = 'none',  
+datatable(check_book, escape = FALSE, width = '100%', height = '100%', filter = 'none',
+                         caption = 'Approximately 60 days of checks from most recent Check.Date', 
                          extensions = c('Buttons', 'Responsive'), 
                          options = list(
                            dom = 'Bfrtip',
                            buttons = list(
                              list(extend = 'excel', title = "Data Download")
                            ),
-                           pageLength = 20,
+                           pageLength = 15,
                            #hide contact information from iunteractive table
                            #columnDefs = list(
                             # list(visible = FALSE, targets = c(7, 8), searchable = TRUE)),
@@ -225,3 +233,5 @@ datatable(check_book, escape = FALSE, width = '100%', height = '100%', filter = 
 
 ```
 
+Row {data-height=20}
+-------------------------------------------------------------------
