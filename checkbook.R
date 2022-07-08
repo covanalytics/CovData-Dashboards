@@ -158,6 +158,7 @@ ggplotly(top10_vndr_plot, tooltip = c("x", "y", "label"))%>%
 ```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
 
 #check amounts by fiscal year
+
   top10_state_plot<- graph_checks %>%
   filter(!grepl("FIRST FINANCIAL BANK", Vendor.Name))%>%
   count(Vendor.State, wt = Total_Amount)%>%
@@ -204,6 +205,7 @@ Row
 
 ```{r  eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
 #Create data table
+
 font.size <- "9pt"
 datatable(check_book, escape = FALSE, width = '100%', height = '100%', filter = 'none',
                          caption = 'Approximately 60 days of checks from most recent Check.Date', 
