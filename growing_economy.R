@@ -1,6 +1,5 @@
 ---
 title: "Growing Economy"
-author: "Todd Sink, City of Covington"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -9,6 +8,8 @@ output:
     source_code: "https://github.com/covanalytics/CovData-Dashboards.git"
     self_contained: false
     favicon: favicon.SEAL.ico
+    includes:
+      in_header: GA_Script.html
 ---
 
 <style>                     
@@ -50,6 +51,12 @@ covdata_comprss <- function(tx, label = FALSE) {
 #Load ED Incentives
 cov_incentives <- read.csv(".../cov_incentives.csv")
 
+#Load Unincentivized jobs created / retained
+load(file = ".../no_incentives_jobs.RData")
+
+uncntv_job <- no_incentive_jobs %>%
+  filter(FY >= max(FY)-4)
+
 #Load Building Permits
 #bld_permits<- read.csv("https://drive.google.com/uc?export=download&id=1DA2ZiG8u0P87f0rdFD4spkE_RKdcG9uF")
 load(file = ".../bld_permits.RData")
@@ -59,6 +66,9 @@ home_purchases <- read.csv("https://drive.google.com/uc?export=download&id=1D7Kl
 ## Load Covington Unemployment Rate data downloaded from BLS
 #u_rate <- read.csv("https://drive.google.com/uc?export=download&id=1D3f8vDPc06dzZQCsGBMimFboTZzaLOG9")
 load(file = ".../u_rate.RData")
+
+cov_incentives <- cov_incentives %>%
+filter(FY >= max(FY, na.rm = TRUE) -4 | is.na(FY))
 
 #Incentives Count
 inctv_all <- cov_incentives %>%
@@ -78,10 +88,12 @@ inctv_revenue <- cov_incentives %>%
 #Jobs Created
 inctv_jobs_created <- cov_incentives %>%
   count(wt = Job.Creation)%>%
+  mutate(n = sum(n + sum(uncntv_job$JC)))%>%
   formatC(1000, format = "d", big.mark = ",")
 #Jobs Retained
 inctv_jobs_retained <- cov_incentives %>%
-  count(wt = Jobs.Retained)
+  count(wt = Jobs.Retained)%>%
+  mutate(n = sum(n + sum(uncntv_job$JR)))
 
 
 ```
@@ -141,7 +153,7 @@ valueBox(inctv_jobs_created, icon = "fa-user", color = "#8F8628")
 ### Jobs Retained
 ```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
 
-valueBox(inctv_jobs_retained, icon = "fa-user", color = "#8F8628")
+valueBox(inctv_jobs_retained +3, icon = "fa-user", color = "#8F8628")
 
 ```
 
