@@ -1,5 +1,6 @@
 # CovData-Dashboards
 
+**Dashboards are updated monthly**
 
 ## Public Safety
 
