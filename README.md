@@ -1,4 +1,5 @@
 # CovData-Dashboards
+These are dashboards that are available on the CovData website.
 
 *Dashboards are updated monthly*
 
