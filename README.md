@@ -29,3 +29,7 @@ Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://g
 ## Covington Connect
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/covington_connect.PNG)
+
+```r
+2 = 2
+```
