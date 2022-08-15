@@ -2,6 +2,11 @@
 
 *Dashboards are updated monthly*
 
+## Contact
+Todd Sink, Ph.D:  tsink@covingtonky.gov
+
+Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://github.com/covanalytics/CovData-Dashboards.git))
+
 ## Public Safety
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/public_safety.PNG)
