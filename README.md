@@ -1,7 +1,9 @@
 # CovData-Dashboards
 These are dashboards that are available on the CovData website.
 
-*Dashboards are updated monthly*
+# Built With--
+* [flexdashboard](https://github.com/rstudio/flexdashboard)
+* [plotly](https://github.com/plotly/plotly.R)
 
 ## Contact
 Todd Sink, Ph.D:  tsink@covingtonky.gov
