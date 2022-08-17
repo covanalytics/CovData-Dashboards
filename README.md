@@ -12,6 +12,26 @@ Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://g
 
 ## Public Safety
 
+**Data**---Police, Fire and EMS responses are the events captured in an agency's Computer-Aided Dispatch (CAD) system used to facilitate police, fire or EMS services.  The data is displayed by quarters within fiscal years and is updated monthly.  Color tiles in the dashboard display totals for the current fiscal year.\
+
+**Data Included**
+* Reported Shootings
+* Drug Activity Responses
+* Drunk Driver / DUIs
+* Reported Burglaries
+* Reported Robberies
+* Ambulance Runs
+* Structure Fires
+
+*Structure Fires include*\
+
+* Building fires
+* Chimney or flue fires
+* Cooking fires
+* Fires in structures other than in a building
+* Fuel burner/boiler malfunctions
+* Trash or rubbish fires
+
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/public_safety.PNG)
 
 ## Checkbook
