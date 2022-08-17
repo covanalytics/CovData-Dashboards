@@ -1,7 +1,7 @@
 # CovData-Dashboards
 These are dashboards that are available on the CovData website.
 
-# Built With--
+# Built With
 * [flexdashboard](https://github.com/rstudio/flexdashboard)
 * [plotly](https://github.com/plotly/plotly.R)
 
