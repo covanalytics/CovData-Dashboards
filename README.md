@@ -2,8 +2,10 @@
 These are dashboards that are available on the CovData website.
 
 # Built With
+* [tidyverse](https://www.tidyverse.org/packages/)
 * [flexdashboard](https://github.com/rstudio/flexdashboard)
 * [plotly](https://github.com/plotly/plotly.R)
+
 
 ## Contact
 Todd Sink, Ph.D:  tsink@covingtonky.gov
