@@ -5,7 +5,7 @@ These are dashboards that are available on the CovData website.
 * [tidyverse](https://www.tidyverse.org/packages/)
 * [flexdashboard](https://github.com/rstudio/flexdashboard)
 * [plotly](https://github.com/plotly/plotly.R)
-
+* [DT](https://github.com/rstudio/DT) *checkbook dashboard*
 
 ## Contact
 Todd Sink, Ph.D:  tsink@covingtonky.gov
