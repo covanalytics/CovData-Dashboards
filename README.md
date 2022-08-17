@@ -23,7 +23,7 @@ Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://g
 * Ambulance Runs
 * Structure Fires
 
-*Structure Fires include*\
+*Structure Fires include*
 
 * Building fires
 * Chimney or flue fires
