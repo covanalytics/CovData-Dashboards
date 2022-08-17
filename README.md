@@ -18,7 +18,7 @@ Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://g
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/public_safety.PNG)
 
-**Data**---Police, Fire and EMS responses are the events captured in an agency's Computer-Aided Dispatch (CAD) system used to facilitate police, fire or EMS services.  The data is displayed by quarters within fiscal years and is updated monthly.  Color tiles in the dashboard display totals for the current fiscal year.
+Police, Fire and EMS responses are the events captured in an agency's Computer-Aided Dispatch (CAD) system used to facilitate police, fire or EMS services.  The data is displayed by quarters within fiscal years and is updated monthly.  Color tiles in the dashboard display totals for the current fiscal year.
 
 **Data Included**
 * Reported Shootings
@@ -43,7 +43,7 @@ Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://g
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/checkbook.PNG)
 
-**Data**---Checks written to vendors for services are stored in the City's financial accounting system.  The data is displayed by fiscal years and is updated monthly. 
+Checks written to vendors for services are stored in the City's financial accounting system.  The data is displayed by fiscal years and is updated monthly. 
 
 **Data Included**
 * Dollar amount of checks written
