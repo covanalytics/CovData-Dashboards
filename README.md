@@ -10,7 +10,7 @@ These are dashboards that are available on the CovData website.
 ## Contact
 Todd Sink, Ph.D:  tsink@covingtonky.gov
 
-Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://github.com/covanalytics/CovData-Dashboards.git))
+Project Link: [https://github.com/covanalytics/CovData-Dashboards.git](https://github.com/covanalytics/CovData-Dashboards.git)
 
 ---
 
