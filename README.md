@@ -55,6 +55,14 @@ Checks written to vendors for services are stored in the City's financial accoun
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/growing_economy.PNG)
 
+**Data Included**
+* Economic development incentives (City authorized)
+* Home Purchases
+  - Condominiums
+* Building Permits
+* Unemployment Rate
+
+
 ## Thriving Neighborhoods
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/thriving_neighborhoods.PNG)
