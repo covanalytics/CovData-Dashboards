@@ -69,6 +69,23 @@ Checks written to vendors for services are stored in the City's financial accoun
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/thriving_neighborhoods.PNG)
 
+**Data Included**
+* Recycling participation
+* Recycling tonnage
+* Potholes repaired
+* Waste receptacle issues
+* Code enforcement violations
+
 ## Covington Connect
 
 ![covdata](https://raw.githubusercontent.com/covanalytics/CovData-Dashboards/main/images/covington_connect.PNG)
+
+Covington Connect is an aggressive effort to smash the digital divide in Covington by expanding access to free public Wi-Fi throughout much of the City.
+
+**Data Included**
+* Registrations
+* Marketing Opt-Ins
+* Sessions
+* Sessions Duration
+
+
