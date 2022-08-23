@@ -28,15 +28,12 @@ Police, Fire and EMS responses are the events captured in an agency's Computer-A
 * Reported Robberies
 * Ambulance Runs
 * Structure Fires
-
-*Structure Fires include*
-
-* Building fires
-* Chimney or flue fires
-* Cooking fires
-* Fires in structures other than in a building
-* Fuel burner/boiler malfunctions
-* Trash or rubbish fires
+  - Building fires
+  - Chimney or flue fires
+  - Cooking fires
+  - Fires in structures other than in a building
+  - Fuel burner/boiler malfunctions
+  - Trash or rubbish fires
 
 
 ## Checkbook
@@ -59,6 +56,11 @@ Checks written to vendors for services are stored in the City's financial accoun
 * Economic development incentives (City authorized)
 * Home Purchases
   - Condominiums
+  - Landominiums
+  - Single Family Homes
+  - Two Family Homes
+  - Three Family Homes
+  - Townhomes
 * Building Permits
 * Unemployment Rate
 
