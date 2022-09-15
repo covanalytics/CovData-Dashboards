@@ -61,7 +61,7 @@ covdata_comprss <- function(tx) {
 #Bind list of files into a data frame
 #pruns <- rbind.fill(pruns_files)
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/public_safety/police_runs.RData")
+load(file = "police_runs.RData")
 
 #Incident Types for police run graphics
 report_categories <- c("Shooting / Gunshot Wound", "Drug Activity", "Drunk Driver / DUI",
@@ -94,7 +94,7 @@ qrt_pruns <- pruns_report %>%
 ## Load Fire Runs Files ///////////////////////
 #//////////////////////////////////////////////
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/public_safety/fire_runs.RData")
+load(file = "fire_runs.RData")
 
 #Incident Types for structure fire graphics
 fire_categories <- c("Structure Fire", "Ambulance Runs")
