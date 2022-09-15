@@ -60,7 +60,7 @@ covdata_comprss <- function(tx) {
 #Bind list of files into a data frame
 #recycling <- rbind.fill(recycling_files)
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/thriving_neighborhoods/recycling.RData")
+load(file = "recycling.RData")
 
 #Get recycling percentage by month
 current_recycling <- recycling %>%
@@ -78,7 +78,7 @@ month_recycling <- current_recycling %>%
 ## Load Waste Tonnage /////////////////////////////////
 #//////////////////////////////////////////////////////
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/thriving_neighborhoods/tonnage.RData", .GlobalEnv)
+load(file = "tonnage.RData", .GlobalEnv)
 
 #remove grouped_df class
 tonnage <- as.data.frame(tonnage)
@@ -98,7 +98,7 @@ current_r_tons <- recycling_tonnage%>%
 ## Load Work Orders from Public Works and Solid Waste //
 #//////////////////////////////////////////////////////
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/thriving_neighborhoods/dpw.RData")
+load(file = "thriving_neighborhoods/dpw.RData")
 
 ## Pothole Repairs
 pothole_repairs <- dpw %>%
@@ -143,7 +143,7 @@ current_waste_cans <- waste_cans %>%
 #//////////////////////////////////////////////////////
 
 
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/thriving_neighborhoods/code_violations.RData")
+load(file = "code_violations.RData")
 
 current_violations <- code_violations %>%
   slice(2) %>%
