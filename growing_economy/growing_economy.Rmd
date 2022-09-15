@@ -1,0 +1,326 @@
+---
+title: "Growing Economy"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: yeti
+    social: ["menu"]
+    source_code: "https://github.com/covanalytics/CovData-Dashboards.git"
+    self_contained: false
+    favicon: favicon.SEAL.ico
+    includes:
+      in_header: GA_Script.html
+---
+
+<style>                     
+.navbar {
+  background-color:#46b5d2;
+  border-color:black;
+}
+.navbar-brand {
+font-weight: bold;
+}
+
+</style> 
+
+
+```{r eval=TRUE, message=FALSE, warning=FALSE, cache = TRUE}
+
+library(flexdashboard)
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(ggpubr)
+library(plotly)
+theme_set(theme_pubr())
+
+#Function to abbreviate dollar amounts and add symbol
+covdata_comprss <- function(tx, label = FALSE) { 
+      div <- findInterval(as.numeric(gsub("\\,", "", tx)), 
+         c(0, 1e3, 1e6, 1e9, 1e12) )  # modify this if negative numbers are possible
+      if(label){
+        paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 0), 
+           c("","K","M","B","T")[div], sep = "" )
+      }
+      else{
+        paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 1), 
+           c("","K","M","B","T")[div], sep = "" )}
+      }
+      
+
+#Load ED Incentives
+cov_incentives <- read.csv("U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/cov_incentives.csv")
+
+#Load Unincentivized jobs created / retained
+load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/no_incentives_jobs.RData")
+
+uncntv_job <- no_incentive_jobs %>%
+  filter(FY >= max(FY)-4)
+
+#Load Building Permits
+#bld_permits<- read.csv("https://drive.google.com/uc?export=download&id=1DA2ZiG8u0P87f0rdFD4spkE_RKdcG9uF")
+load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/bld_permits.RData")
+#Load Home Purchases
+home_purchases <- read.csv("https://drive.google.com/uc?export=download&id=1D7KlguBiO-309NO-wx65lq6ZjTdro3MU")
+
+## Load Covington Unemployment Rate data downloaded from BLS
+#u_rate <- read.csv("https://drive.google.com/uc?export=download&id=1D3f8vDPc06dzZQCsGBMimFboTZzaLOG9")
+load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/u_rate.RData")
+
+cov_incentives <- cov_incentives %>%
+filter(FY >= max(FY, na.rm = TRUE) -4 | is.na(FY))
+
+#Incentives Count
+inctv_all <- cov_incentives %>%
+  count()
+#Amount of Direct City Incentives
+inctv_city_direct <- cov_incentives %>%
+  count(wt = Direct.City.Incentive)
+#Amount of Leveraged Investment
+inctv_leveraged <- cov_incentives %>%
+  count(wt = Leveraged.Investment)
+#Amount of Leveraged Investment
+inctv_leveraged <- cov_incentives %>%
+  count(wt = Leveraged.Investment)
+#Project Net Revenue from Incentives
+inctv_revenue <- cov_incentives %>%
+  count(wt = Projected.Net.Revenue.over.Term)
+#Jobs Created
+inctv_jobs_created <- cov_incentives %>%
+  count(wt = Job.Creation)%>%
+  mutate(n = sum(n + sum(uncntv_job$JC)))%>%
+  formatC(1000, format = "d", big.mark = ",")
+#Jobs Retained
+inctv_jobs_retained <- cov_incentives %>%
+  count(wt = Jobs.Retained)%>%
+  mutate(n = sum(n + sum(uncntv_job$JR)))
+
+
+```
+
+
+Dashboard
+===================================
+
+
+Row
+----------------------------------
+ 
+###
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox("5-Year Totals",  icon = "", color = "#bfbfbf")
+
+```
+ 
+### ED Incentives 
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(inctv_all,  icon = "fa-clipboard-list", color = "#46b5d2")
+
+```
+
+### Direct City Incentives
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(paste("$", covdata_comprss(inctv_city_direct + 710000), sep = " "), icon = "fa-money-bill", color = "#82b74b" )
+
+```
+
+
+### Leveraged Investment
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(paste("$", covdata_comprss(inctv_leveraged), sep = " "), icon = "fa-money-bill", color = "#82b74b" )
+
+```
+
+
+### Projected Net Revenue from Incentives
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(paste("$", covdata_comprss(inctv_revenue), sep = " "), icon = "fa-money-bill", color = "#82b74b" )
+
+```
+
+### Jobs Created
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(inctv_jobs_created, icon = "fa-user", color = "#8F8628")
+
+```
+
+### Jobs Retained
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(inctv_jobs_retained +3, icon = "fa-user", color = "#8F8628")
+
+```
+
+
+Row
+----------------------------------------------------------------------
+
+### **Home Purchases**
+
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+home_purchases$Date <- ymd(home_purchases$Date)
+home_purchases$Date <- format(home_purchases$Date, "%Y-%m")
+
+#home purchases by year
+  purchases_plot <- home_purchases %>%
+  #filter(Year >= 2018)%>%
+  count(Year)%>%
+  rename(Purchases = n)%>%
+  mutate_at(vars(Year), as.character)%>%
+  ggplot(aes(x=Year, y=Purchases))+
+  geom_bar(stat = 'identity', fill = "#46b5d2")+
+  ylim(c(0,800))+
+  geom_text(aes(label=paste0(Purchases, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  theme_bw()+
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_blank())
+
+
+ggplotly(purchases_plot, tooltip = c("x", "y"))%>%
+ config(displayModeBar = F)%>%
+  layout(hoverlabel=list(bgcolor="white"),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+```
+
+
+### **Building Permits Issued**
+
+```{r  eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#Building Permit Counts
+permits_plot <- bld_permits %>%
+  mutate_at(vars(Year), as.character)%>%
+  count(Year, Main.Type)%>%
+  dplyr::rename(Permits = n,
+                Type = Main.Type)%>%
+
+ggplot(aes(x=Year, y = Permits, fill = Type))+
+  geom_bar(stat = 'identity', position = "dodge")+
+  
+  theme_bw()+
+  scale_fill_manual(values=c('#A946D2','#D26346'), name = "")+
+  ylim(c(0,800))+
+  geom_text(aes(label=paste0(Permits, "<br>")), 
+            position = position_dodge(0.9), vjust = 2,  size = 3.3, check_overlap = TRUE)+
+  
+  theme(legend.position = "right",
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_blank())
+
+
+ggplotly(permits_plot, tooltip = c("x", "y"))%>%
+ config(displayModeBar = F)%>%
+  layout(legend = list(orientation = 'h'),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+
+```
+
+
+### **Building Permits Value**
+
+```{r  eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+## Building Permit Total Values
+permits_value_plot <- bld_permits %>%
+  mutate_at(vars(Year), as.character)%>%
+  count(Year, Main.Type, wt = Value)%>%
+  dplyr::rename(Value = n,
+                Type = Main.Type)%>%
+  mutate(Value_ = covdata_comprss(Value, label = TRUE))%>%
+
+  ggplot(aes(x=Year, y = Value, fill = Type, group = Type, label = Value_))+
+  geom_bar(stat = 'identity', position = "dodge")+
+  
+  theme_bw()+
+  scale_fill_manual(values=c('#A946D2','#D26346'))+
+  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 120000000), )+
+  
+  geom_text(aes(label=paste0(Value_, '<br>')), position = position_dodge(0.9), size = 3.3)+
+  
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_blank())
+
+ggplotly(permits_value_plot, tooltip = c("x", "y"))%>%
+ config(displayModeBar = F)%>%
+  layout(xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+
+```
+
+Row
+----------------------------------------------------------------------
+ 
+### **Covington Unemployment Rate %**
+
+```{r  eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#unemployment rate by month and year
+  unemployment_plot <- u_rate %>%
+  mutate_at(vars(Date), list(ym))%>%
+  mutate(`M-Y` = format(Date, "%m-%Y"))%>%
+  ggplot(aes(x=Date, y=Rate, label = `M-Y`))+
+  geom_line() + 
+  #geom_point(size = 1) +
+  scale_x_date(date_minor_breaks = "1 month")+
+  theme_bw()+
+        theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.ticks.x = element_line(colour = "black"),
+        axis.text = element_text(size = 8), 
+        axis.title = element_blank(),
+        panel.grid.major = element_line(colour = "#D4D2D3"))
+
+
+  
+ggplotly(unemployment_plot, tooltip = c("y", "label"))%>%
+ config(displayModeBar = F)%>%
+  layout(hoverlabel=list(bgcolor="white"),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+```
+
+
+
+Description
+===================================
+
+Column
+-------------------------------------------------------------------
+###
+
+**Economic Development (ED) Incentives**---Economic development incentives consist of financial awards, loans, and grants that are designed to attract and grow businesses in Covington. 
+
+**Home Purchases**---Home purchases include only arms length real estate transactions involving the following properties\
+
+* Condominiums
+* Landominiums
+* Single Family
+* Two Family
+* Three Family
+* Townhomes
+
+The source of this data is the office of the [Kenton County Property Value Administrator](https://www.kentoncounty.org/386/Property-Valuation-Administrator-PVA)
+
+**Building Permits**---Building Permits are the authorization by the codes administration to undertake commercial or residential construction projects.  The source of this data is [Planning and Development Services of Kenton County (PDS)](https://www.pdskc.org/)\
+
+**Unemployment Rate**---Employment data for Covington, KY is available from the [US Bureau of Labor Statistics](https://beta.bls.gov/dataViewer/view/e77bf513821e47de806930d356405286)
+
+
+*Last Update: `r Sys.Date()`*
+
+
+

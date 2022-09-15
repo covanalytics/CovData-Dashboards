@@ -1,0 +1,397 @@
+---
+title: "Public Safety"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: yeti
+    social: ["facebook", "linkedin", "twitter"]
+    source_code: "https://github.com/covanalytics/CovData-Dashboards.git"
+    self_contained: false
+    favicon: favicon.SEAL.ico
+    includes:
+      in_header: GA_Script.html
+---
+
+<style>                     
+.navbar {
+  background-color:#46b5d2;
+  border-color:black;
+}
+.navbar-brand {
+font-weight: bold;
+}
+
+
+</style> 
+
+
+```{r eval=TRUE, message=FALSE, warning=FALSE, cache = TRUE}
+
+library(flexdashboard)
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(ggpubr)
+library(plotly)
+library(fontawesome)
+theme_set(theme_pubr())
+
+#Function to large values and add symbol
+covdata_comprss <- function(tx) { 
+      div <- findInterval(as.numeric(gsub("\\,", "", tx)), 
+         c(0, 1e3, 1e6, 1e9, 1e12) )  # modify this if negative numbers are possible
+      paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 2), 
+           c("","K","M","B","T")[div], sep = "" )}
+
+
+#////////////////////////////////////////////////
+## Load All Police Runs Files from CovData Site /
+#////////////////////////////////////////////////
+
+##Store police file ids in vector
+#file for 2017-most current year
+#p_file_ids <- c("0BxZjyP_Xfv7cM1pselEtbUVmRTg", "10Ppmi-L4r84_-2hU9TqsLDhVWogymQUz","1fDmpOwOwnm6wbCSQtwQlywK7QeDJn2Ql",  "1X4Wf7_FaVwszCxetjSPPq8TWCMfG-2GA", "1mS-tptRDvfwrg5XOIilQqp1nMJDzyv4-", "1CTIqcChCexp-iITeHCiT3eT7utIN2Sty") 
+
+#Paste file ids and download string and store in list
+#dwnld_p_file_ids <- lapply(p_file_ids, function(x) paste("https://drive.google.com/uc?export=download&id=", x, sep = ""))
+
+#Read content of each file into a list
+#pruns_files <- lapply(dwnld_p_file_ids, function(x) read.csv(file = x))
+
+#Bind list of files into a data frame
+#pruns <- rbind.fill(pruns_files)
+
+load(file = "police_runs.RData")
+
+#Incident Types for police run graphics
+report_categories <- c("Shooting / Gunshot Wound", "Drug Activity", "Drunk Driver / DUI",
+                       "Burglary", "Robbery")
+
+#Not Covington Runs
+not_cov_runs <- c("Mutual Aid")
+
+#Final data frame for police data graphics
+#Keeping last five years
+pruns_report <- pruns %>%
+  mutate(YMD = format(strptime(Date_Time, format='%Y-%m-%d %H:%M:%S'), '%Y-%m-%d'),
+         FY.Q = lubridate::quarter(YMD, with_year = TRUE, fiscal_start = 7),
+         Qrt = paste("Q", lubridate::quarter(YMD, with_year = FALSE, fiscal_start = 7), sep = ""),
+         FY_sort = as.numeric(str_sub(FY.Q, 1, 4)))%>%
+  filter(FY_sort >= max(FY_sort)-4 & !(Neighborhood %in% not_cov_runs))%>%
+  mutate(across(everything(), as.character),
+        FY = str_sub(FY.Q, 1, 4),
+        Qrt = factor(Qrt, levels = c("Q4", "Q3", "Q2", "Q1")))
+ 
+#Quarterly Police Dept. Runs   
+qrt_pruns <- pruns_report %>%
+  count(FY, Incident_Type)%>%
+  mutate(FY = as.numeric(FY))%>%
+  arrange(desc(FY))
+
+
+
+#//////////////////////////////////////////////
+## Load Fire Runs Files ///////////////////////
+#//////////////////////////////////////////////
+
+load(file = "fire_runs.RData")
+
+#Incident Types for structure fire graphics
+fire_categories <- c("Structure Fire", "Ambulance Runs")
+
+#Final data frame for fire data graphics
+#Keeping last five years
+fruns_report <- fruns %>%
+  mutate(YMD = ymd(Date),
+         FY.Q = lubridate::quarter(YMD, with_year = TRUE, fiscal_start = 7),
+         Qrt = paste("Q", lubridate::quarter(YMD, with_year = FALSE, fiscal_start = 7), sep = ""),
+         FY_sort = as.numeric(str_sub(FY.Q, 1, 4)))%>%
+  filter(FY_sort >= max(FY_sort)-4  & !(Neighborhood %in% not_cov_runs))%>%
+  mutate(across(everything(), as.character),
+        FY = str_sub(FY.Q, 1, 4),
+        Qrt = factor(Qrt, levels = c("Q4", "Q3", "Q2", "Q1")))
+
+
+#Quarterly Fire Dept. Runs   
+qrt_fruns <- fruns_report %>%
+  count(FY, Incident_Description)%>%
+  mutate(FY = as.numeric(FY))%>%
+  arrange(desc(FY))
+
+
+## Current Quarter Activity
+#Count of current quarter reported shootings 
+qrt_shootings <- qrt_pruns %>%
+  filter(Incident_Type == report_categories[1]) %>%
+  slice(1)
+#Count of current quarter reported drug activity 
+qrt_drugs <- qrt_pruns %>%
+  filter(Incident_Type == report_categories[2]) %>%
+  slice(1)
+#Count of current quarter duis
+qrt_dui <- qrt_pruns %>%
+  filter(Incident_Type == report_categories[3]) %>%
+  slice(1)
+#Count of current quarter burglaries
+qrt_burglary <- qrt_pruns %>%
+  filter(Incident_Type == report_categories[4]) %>%
+  slice(1)
+#Count of current quarter burglaries
+qrt_robbery <- qrt_pruns %>%
+  filter(Incident_Type == report_categories[5]) %>%
+  slice(1)
+
+#Count of current quarter ambulance runs
+qrt_ambulance <- qrt_fruns %>%
+  filter(Incident_Description == fire_categories[2]) %>%
+  slice(1)
+#Count of current quarter ambulance runs
+qrt_fire <- qrt_fruns %>%
+  filter(Incident_Description == fire_categories[1]) %>%
+  slice(1)
+
+
+```
+
+
+Dashboard {data-icon="fa-signal"}
+===================================
+
+Row
+------------------------------------
+
+### Reported Shootings
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(qrt_shootings[1,3], icon = "fa-gavel" , color = "#46b5d2")
+
+```
+
+### Drug Activity Responses
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(qrt_drugs[1,3], icon = "fa-capsules", color = "#46b5d2" )
+
+```
+
+### Ambulance Runs
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(covdata_comprss(qrt_ambulance[1,3]), icon = "fa-briefcase-medical", color = "#ef3b92" )
+
+```
+
+### Structure Fires
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(qrt_fire[1,3], icon = "fa-fire-extinguisher", color = "#ef3b92")
+
+```
+
+### Drunk Driver / DUIs
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(qrt_dui[1,3], icon = "fa-car", color = "#46b5d2" )
+
+```
+
+### Reported Burglaries
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(qrt_burglary[1,3], icon = "fa-building", color = "#46b5d2")
+
+```
+
+### Reported Robberies
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+valueBox(qrt_robbery[1,3], icon = "fa-dollar", color = "#46b5d2")
+
+```
+
+
+Row 
+-----------------------------------------------------------------------
+
+### **Reported Shootings**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+## Keep reported shootings
+shootings <- pruns_report %>%
+  filter(Incident_Type == report_categories[1])
+
+#Making plot
+shootings_plot <- shootings %>%
+  count(FY, Qrt)%>%
+  dplyr::rename(Shootings = n)
+  
+covdata_stacked_bar <- function(df, aes_x, aes_y, aes_fill, aes_label, legend_position = "none"){
+  ggplot(df, aes(x={{aes_x}}, y={{aes_y}}, fill={{aes_fill}}))+
+  geom_bar(stat = 'identity')+
+  scale_fill_manual(values=c('#935b31', '#d28246', '#318693', '#469cd2'))+
+  geom_text(aes(label=paste0(scales::comma({{aes_label}}, accuracy = 1))), size = 3.2, position= position_stack(0.5), size = 2.4)+
+  theme_bw()+
+  scale_y_continuous(label=scales::label_number_si())+  
+  theme(legend.position = legend_position,
+        legend.title = element_blank(),
+        axis.title = element_blank())
+} 
+
+shootings_plot <- covdata_stacked_bar(shootings_plot, FY, Shootings, Qrt, Shootings, "right")
+
+#Interactive plot
+covdata_ggplotly <- function(ggplot_graph){
+ggplotly(ggplot_graph, tooltip = c("x", "y"))%>%
+  layout(legend = list(orientation = "v"),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))%>%
+  config(displayModeBar = F)
+}
+
+shootings_plot <- covdata_ggplotly(shootings_plot)
+shootings_plot
+
+
+```
+
+
+### **Drug Activity Responses**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+## Keep reported drug activity
+drug_activity <- pruns_report %>%
+  filter(Incident_Type == report_categories[2])
+
+#Making plot
+drugs_plot <- drug_activity %>%
+  count(FY, Qrt)%>%
+  dplyr::rename(Drug.Activity = n)
+  
+drugs_plot <- covdata_stacked_bar(drugs_plot, FY, Drug.Activity, Qrt, Drug.Activity )  
+drugs_plot <- covdata_ggplotly(drugs_plot)
+drugs_plot
+
+```
+
+
+### **Ambulance Runs**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#Making plot
+ambulance_plot <- fruns_report %>%
+  filter(Incident_Description == fire_categories[2])%>%
+  count(FY, Qrt)%>%
+  dplyr::rename(Amb.Runs = n)
+
+ambulance_plot <- covdata_stacked_bar(ambulance_plot, FY, Amb.Runs, Qrt, Amb.Runs)
+ambulance_plot <- covdata_ggplotly(ambulance_plot)
+ambulance_plot
+
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### **Structure Fires**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#Making plot
+fires_plot <- fruns_report %>%
+  filter(Incident_Description == fire_categories[1])%>%
+  count(FY, Qrt)%>%
+  dplyr::rename(Str.Fires = n)
+
+fires_plot <- covdata_stacked_bar(fires_plot, FY, Str.Fires, Qrt, Str.Fires)
+fires_plot <- covdata_ggplotly(fires_plot)
+fires_plot
+
+```
+
+
+### **Drunk Driver / DUI**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+## Keep drunk driver / dui runs
+dui <- pruns_report %>%
+  filter(Incident_Type == report_categories[3])
+
+#Making plot
+dui_plot <- dui %>%
+ count(FY, Qrt)%>%
+ dplyr::rename(DUIs = n)
+
+dui_plot <- covdata_stacked_bar(dui_plot, FY, DUIs, Qrt, DUIs)
+dui_plot <- covdata_ggplotly(dui_plot)
+dui_plot
+
+```
+
+
+### **Reported Burglaries**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+## Keep reported drug activity
+burglaries <- pruns_report %>%
+  filter(Incident_Type == report_categories[4])
+
+#Making plot
+burglary_plot <- burglaries %>%
+  count(FY, Qrt)%>%
+  dplyr::rename(Burglaries = n)
+
+burglary_plot <- covdata_stacked_bar(burglary_plot, FY, Burglaries, Qrt, Burglaries)
+burglarly_plot <- covdata_ggplotly(burglary_plot)
+burglarly_plot
+
+```
+
+### **Reported Robberies**
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+## Keep reported drug activity
+robberies <- pruns_report %>%
+  filter(Incident_Type == report_categories[5])
+
+#Making plot
+robbery_plot <- robberies %>%
+  count(FY, Qrt)%>%
+  dplyr::rename(Robberies = n)
+
+robbery_plot <- covdata_stacked_bar(robbery_plot, FY, Robberies, Qrt, Robberies)
+robbery_plot <- covdata_ggplotly(robbery_plot)
+robbery_plot
+   
+
+```
+
+
+Description
+===================================
+
+Column
+-------------------------------------------------------------------
+
+###
+
+**Data**---Police, Fire and EMS responses are the events captured in an agency's Computer-Aided Dispatch (CAD) system used to facilitate police, fire or EMS services.  The data is displayed by quarters within fiscal years and is updated monthly.  Color tiles in the dashboard display totals for the current fiscal year.\
+
+*Structure Fires include*\
+
+* Building fires
+* Chimney or flue fires
+* Cooking fires
+* Fires in structures other than in a building
+* Fuel burner/boiler malfunctions
+* Trash or rubbish fires
+
+**Fiscal Year Quarters**\
+
+* Q1: July - September
+* Q2: October - December
+* Q3: January - March
+* Q4: April - June
+
+
+*Last Update: `r Sys.Date()`*
+
+

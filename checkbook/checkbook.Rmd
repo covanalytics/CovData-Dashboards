@@ -1,0 +1,228 @@
+---
+title: "Checkbook"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: yeti
+    social: ["menu"]
+    source_code: "https://github.com/covanalytics/CovData-Dashboards.git"
+    self_contained: false
+    favicon: favicon.SEAL.ico
+    css: dataTables.css
+    includes:
+      in_header: GA_Script.html
+
+---
+
+<style>                     
+.navbar {
+  background-color:#46b5d2;
+  border-color:black;
+}
+.navbar-brand {
+font-weight: bold;
+}
+
+.dataTables_scrollBody {
+    max-height: 100% !important;
+}
+</style> 
+
+```{r eval=TRUE, message=FALSE, warning=FALSE, cache = TRUE}
+
+library(flexdashboard)
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(ggpubr)
+library(plotly)
+library(scales)
+library(DT)
+library(tidytext)
+theme_set(theme_pubr())
+
+#Function to abbreviate dollar amounts and add symbol
+covdata_comprss <- function(tx, label = FALSE) { 
+      div <- findInterval(as.numeric(gsub("\\,", "", tx)), 
+         c(0, 1e3, 1e6, 1e9, 1e12) )  # modify this if negative numbers are possible
+      if(label){
+        paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 0), 
+           c("","K","M","B","T")[div], sep = "" )
+      }
+      else{
+        paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 1), 
+           c("","K","M","B","T")[div], sep = "" )}
+      }
+      
+
+
+
+#All checks (last 60 days from update)
+load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/checkbook/check_book.RData")
+#Grouped for charts
+load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/checkbook/graph_checks.RData")
+
+```
+
+
+Dashboard
+===================================
+
+
+Column
+----------------------------------------------------------------------
+
+### **Check Amounts**
+
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#check amounts by fiscal year
+  chk_amount_plot<- graph_checks %>%
+  #filter(Year >= 2018)%>%
+  count(Fiscal.Year, wt = Total_Amount)%>%
+  rename(Amount = n, 
+         FY = Fiscal.Year)%>%
+  mutate(Label_ = covdata_comprss(Amount, label = TRUE))%>%
+  ggplot(aes(x=FY, y=Amount, label = Label_))+
+  geom_bar(stat = 'identity', fill = "#46b5d2")+
+  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 25000000), )+
+  geom_text(aes(label=paste0(Label_, "<br>")),  position=position_nudge(0.0), size = 3.3)+
+  theme_bw()+
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_blank())
+
+
+ggplotly(chk_amount_plot, tooltip = c("x", "y"))%>%
+ config(displayModeBar = F)%>%
+  layout(hoverlabel=list(bgcolor="white"),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+
+
+```
+> *Updated : `r Sys.Date()`*
+
+Column
+----------------------------------------------------------------------
+ 
+### **Top 10 Vendors**
+
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#check amounts by fiscal year
+  top10_vndr_plot<- graph_checks %>%
+  #filter(Year >= 2018)%>%
+  count(Vendor.Name, wt = Total_Amount)%>%
+  rename(Amount = n, 
+         Vendor = Vendor.Name)%>%
+  mutate(Label_ = covdata_comprss(Amount, label = TRUE),
+         Pct. = round(Amount / sum(Amount)*100, 0),
+         Vendor = fct_reorder(Vendor, Amount))%>%
+  arrange(desc(Amount))%>%
+  slice(1:10)%>%
+  ggplot(aes(x=Vendor, y=Amount, label = Label_, fill = Vendor))+
+  geom_bar(stat = 'identity', color = "#b2b2b2")+
+  scale_fill_brewer(palette = "Set3")+
+  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 14000000))+
+  coord_flip()+
+ # geom_text(aes(label=paste0(covdata_comprss(Amount), "<br>")),position=position_nudge(0.0, -0.5),  size = 2.9)+
+  theme_bw()+
+  
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_blank(),
+        panel.grid.major=element_line(colour="#b2b2b2"),
+        panel.grid.minor=element_line(colour="#b2b2b2"))
+
+
+ggplotly(top10_vndr_plot, tooltip = c("x", "y", "label"))%>%
+ config(displayModeBar = F)%>%
+  layout(hoverlabel=list(bgcolor="white"),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+
+
+```
+
+ 
+### **Top 10 States**
+
+```{r eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+
+#check amounts by fiscal year
+  top10_state_plot<- graph_checks %>%
+  #filter(Year >= 2018)%>%
+  count(Vendor.State, wt = Total_Amount)%>%
+  rename(Amount = n, 
+         State = Vendor.State)%>%
+  mutate(Label_ = covdata_comprss(Amount, label = TRUE),
+         Pct. = round(Amount / sum(Amount)*100, 0),
+         State = fct_reorder(State, Amount))%>%
+  arrange(desc(Amount))%>%
+  filter(State != "None")%>%
+  slice(1:10)%>%
+  ggplot(aes(x=State, y=Amount, label = Label_, fill = State))+
+  geom_bar(stat = 'identity', color = "#b2b2b2")+
+  scale_fill_brewer(palette = "Set3")+
+  scale_y_continuous(label=scales::label_number_si(), limits = c(0, 50000000))+
+  coord_flip()+
+ # geom_text(aes(label=paste0(covdata_comprss(Amount), "<br>")),position=position_nudge(0.0, -0.5),  size = 2.9)+
+  theme_bw()+
+  
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_blank(),
+        panel.grid.major=element_line(colour="#b2b2b2"),
+        panel.grid.minor=element_line(colour="#b2b2b2"))
+
+
+ggplotly(top10_state_plot, tooltip = c("x", "y", "label"))%>%
+ config(displayModeBar = F)%>%
+  layout(hoverlabel=list(bgcolor="white"),
+         xaxis=list(fixedrange=TRUE), yaxis=list(fixedrange=TRUE))
+
+
+
+```
+> **Based on billing address of vendors**
+
+Table
+===================================
+
+Row
+-------------------------------------------------------------------
+
+```{r  eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE, cache=FALSE}
+#Create data table
+font.size <- "9pt"
+datatable(check_book, escape = FALSE, width = '100%', height = '100%', filter = 'none',  
+                         extensions = c('Buttons', 'Responsive'), 
+                         options = list(
+                           dom = 'Bfrtip',
+                           buttons = list(
+                             list(extend = 'excel', title = "Data Download")
+                           ),
+                           pageLength = 20,
+                           #hide contact information from iunteractive table
+                           #columnDefs = list(
+                            # list(visible = FALSE, targets = c(7, 8), searchable = TRUE)),
+                             
+                           #autoWidth = TRUE,
+                           #columnDefs = list(list(width = '500px', targets = c(1, 2, 3))),
+                           #columnDefs = list(list(className = 'dt-center', targets = 1:4)),
+                           initComplete = htmlwidgets::JS(
+                             "function(settings, json) {",
+                             paste0("$(this.api().table().container()).css({'font-size': '", font.size, "'});"),
+                             paste0("$(this.api().table().header()).css({'background-color': '#46b5d2', 'color': 'black'});"),
+                             "}")
+                          )
+                         )
+
+
+
+```
+
