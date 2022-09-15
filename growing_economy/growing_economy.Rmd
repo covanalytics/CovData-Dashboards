@@ -49,23 +49,23 @@ covdata_comprss <- function(tx, label = FALSE) {
       
 
 #Load ED Incentives
-cov_incentives <- read.csv("U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/cov_incentives.csv")
+cov_incentives <- read.csv("cov_incentives.csv")
 
 #Load Unincentivized jobs created / retained
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/no_incentives_jobs.RData")
+load(file = "no_incentives_jobs.RData")
 
 uncntv_job <- no_incentive_jobs %>%
   filter(FY >= max(FY)-4)
 
 #Load Building Permits
 #bld_permits<- read.csv("https://drive.google.com/uc?export=download&id=1DA2ZiG8u0P87f0rdFD4spkE_RKdcG9uF")
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/bld_permits.RData")
+load(file = "bld_permits.RData")
 #Load Home Purchases
 home_purchases <- read.csv("https://drive.google.com/uc?export=download&id=1D7KlguBiO-309NO-wx65lq6ZjTdro3MU")
 
 ## Load Covington Unemployment Rate data downloaded from BLS
 #u_rate <- read.csv("https://drive.google.com/uc?export=download&id=1D3f8vDPc06dzZQCsGBMimFboTZzaLOG9")
-load(file = "U:/CityWide Performance/CovStat/CovStat Projects/OpenData/growing_economy/u_rate.RData")
+load(file = "u_rate.RData")
 
 cov_incentives <- cov_incentives %>%
 filter(FY >= max(FY, na.rm = TRUE) -4 | is.na(FY))
